@@ -6,6 +6,10 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
+import { AuthProvider } from './contexts/authContext';
+import { useAuth } from './contexts/authContext';
+import React from 'react';
+
 
 
 // Import des pages
@@ -17,7 +21,7 @@ import Stats from './menu/stats'; // Statistiques
 import Sucre from './menu/sucre'; // Ajout taux de sucre
 import TraitementScreen from './menu/traitement'; // 📌 assure-toi que le chemin est correct
 import RegisterScreen from './register';
-import LoginScreen from './index';
+
 
 const Drawer = createDrawerNavigator();
 
@@ -75,6 +79,10 @@ const CustomDarkTheme = {
 };
 
 function AppDrawer() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return <Text>Loading...</Text>; // You can replace this with a loading spinner
+  }
   return (
     <Drawer.Navigator
       initialRouteName="index"
@@ -237,13 +245,14 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-
   if (!loaded) return null;
-
   return (
     <ThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomTheme}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      <AppDrawer />
+      <AuthProvider>
+        <AppDrawer />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
+

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 // Define your color palette (same as Register screen)
 const primaryBlue = '#2196f3';
@@ -18,10 +20,18 @@ export default function Login() {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs.');
       return;
     }
-
-    // Simuler la réussite de la connexion
-    Alert.alert('Connexion réussie', `Bienvenue, ${email}!`);
-    router.push('/');
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        Alert.alert('Connexion réussie', `Bienvenue, ${email}!`);
+        router.push('/home'); // Navigate to the home screen
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        Alert.alert('Erreur', errorMessage);
+      });
   };
 
   return (

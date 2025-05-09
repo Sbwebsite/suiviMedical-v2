@@ -10,7 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+const auth = getAuth();
 // Define your color palette
 const primaryBlue = '#2196f3';
 const lightBlue = '#90caf9';
@@ -123,23 +124,34 @@ export default function Register() {
     return true;
   };
 
-const handleNext = () => {
-  if (validateStep()) {
-    if (step === 4) {
-      Alert.alert('Succès', `Inscription terminée pour ${formData.email}`);
-      router.push('/'); // Navigate back to the root route (login)
-    } else {
-      Animated.timing(formOpacity, {
-        toValue: 0,
-        duration: 200,
-        easing: Easing.ease,
-        useNativeDriver: true,
-      }).start(() => {
-        setStep(step + 1);
-      });
+  const handleNext = () => {
+    if (validateStep()) {
+      if (step === 4) {
+        createUserWithEmailAndPassword(auth, formData.email, formData.password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            Alert.alert('Succès', `Inscription terminée pour ${formData.email}`);
+            router.push('/'); // Navigate back to the login screen
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            Alert.alert('Erreur', errorMessage);
+          });
+      } else {
+        // Proceed to the next step
+        Animated.timing(formOpacity, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }).start(() => {
+          setStep(step + 1);
+        });
+      }
     }
-  }
-};
+  };
+  
 
   const handleBack = () => {
     Animated.timing(formOpacity, {
